@@ -2,6 +2,13 @@
 This dashboard presents an exploratory data analysis of the Sakila database, which is a sample database provided by MySQL that represents a DVD rental store. The analysis includes various visualizations and insights derived from the data contained within the Sakila database.
 
 ## Task 1 A: Which movies are longer than 180 minutes?
+## Films table test
+
+```sql film
+SELECT *
+FROM film
+LIMIT 5;
+
 
 ```
 SELECT 
@@ -14,3 +21,6 @@ WHERE
 ORDER BY
     length DESC;
 ```
+
+## Task 1 B: Which movies have the word "love" in the title?
+

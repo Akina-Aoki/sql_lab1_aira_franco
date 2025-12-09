@@ -1,3 +1,3 @@
 ``` sql film
-FROM sakila.film;
+FROM film;
 ```
