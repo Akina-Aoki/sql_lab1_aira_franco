@@ -9,7 +9,7 @@ The analysis includes various visualizations and insights derived from the data 
 </Details>
 
 ## Task 1 A: Which movies are longer than 180 minutes?
-## Films table test
+
 ```sql film_180
 SELECT 
     title,
@@ -21,7 +21,6 @@ WHERE
 ORDER BY
     length DESC;
 ```
-
 <Histogram
     data={film_180}
     x = "title"
@@ -96,10 +95,9 @@ This section summarizes daily rental prices across all films.
 - We can also show all the films that has a daily_price of 1.66
 - Show summary stats (min, mean, median, max).
 - Compute percentiles to show typical (median) and high-end prices 
-- This avoids tie issues in a fixed Top 10 and gives a full-picture view.
 
-
-``` sql film_price_distribution
+### All the films that has a daily_price of 1.66
+```sql films_price_166
 SELECT
   title,
   ROUND(rental_rate / rental_duration, 2) AS daily_price
