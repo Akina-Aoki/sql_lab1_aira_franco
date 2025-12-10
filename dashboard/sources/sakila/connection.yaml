@@ -4,7 +4,7 @@ name: sakila # adjusted to sakila database
 type: duckdb
 options:
   filename: sakila.duckdb
-  # schema: staging
+
 
   # adjusted to data/sakila database since file lives there
   # Without this adjustment, dashboards will operate on an empty environment

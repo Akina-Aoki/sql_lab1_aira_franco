@@ -11,16 +11,7 @@ This dashboard presents an exploratory data analysis of the Sakila database, whi
 
 ## Task 1 A: Which movies are longer than 180 minutes?
 ## Films table test
-
-```sql film
-SELECT *
-FROM sakila.film;
-```
-
-
-## Task 1 B: Which movies have the word "love" in the title?
-
-```sql film
+```sql film_180
 SELECT 
     title,
     length
@@ -31,6 +22,24 @@ WHERE
 ORDER BY
     length DESC;
 ```
+
+
+## Task 1 B: Which movies have the word "love" in the title?
+
+``` sql film_love
+SELECT
+    title,
+    rating,
+    length,
+    description
+FROM 
+    film
+WHERE
+    title ILIKE 'love %'
+    OR title ILIKE '% love'
+```
+
+
 
 
 
