@@ -1,0 +1,1 @@
+SELECT * FROM staging.film_actor;
