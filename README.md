@@ -118,7 +118,7 @@ DUCKDB_PATH = DATA_PATH / "sakila.duckdb"
 ```
 
 - This means the database lives here: `data/sakila.duckdb`
-- Run to check the sakila.duckdb file in the terminal. 
+### Run to check the sakila.duckdb file in the terminal. 
 ```
 duckdb data/sakila.duckdb
 ```

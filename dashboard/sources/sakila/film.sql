@@ -1,3 +1,1 @@
-``` sql film
-FROM film;
-```
+SELECT * FROM staging.film;
