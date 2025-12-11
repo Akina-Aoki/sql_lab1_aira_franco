@@ -4,8 +4,6 @@ title: Sakila Database Analysis
 
 <Details title = 'Exploratory Data Analysis of the Sakila Database'>
 This dashboard presents an exploratory data analysis of the Sakila database, which is a sample database provided by MySQL that represents a DVD rental store. 
-
-The analysis includes various visualizations and insights derived from the data contained within the Sakila database.
 </Details>
 
 ## Task 1 A: Which movies are longer than 180 minutes?
@@ -21,17 +19,11 @@ WHERE
 ORDER BY
     length DESC;
 ```
-<Histogram
-    data={film_180}
-    x = "title"
-    y = "length"
-    title = "Movies Longer than 180 Minutes"
-/>
 
 
 ## Task 1 B: Which movies have the word "love" in the title?
 
-``` sql film_love
+```sql film_love
 SELECT
     title,
     rating,
@@ -89,19 +81,57 @@ FROM ranked
 WHERE rank_num <= 10
 ORDER BY rank_num, title;
 ```
+<DataTable
+    data={film_expensive}
+    title="Top 10 Most Expensive Films"
+/>
 
 ## EXTRA EDA: films price distribution and percentiles
-This section summarizes daily rental prices across all films.
-- We can also show all the films that has a daily_price of 1.66
 - Show summary stats (min, mean, median, max).
-- Compute percentiles to show typical (median) and high-end prices 
 
-### All the films that has a daily_price of 1.66
-```sql films_price_166
+```sql daily_stats
 SELECT
-  title,
-  ROUND(rental_rate / rental_duration, 2) AS daily_price
-FROM film
-WHERE daily_price = 1.66
-ORDER BY title;
+  COUNT(*)                               AS n,
+  MIN(rental_rate / rental_duration)     AS min,
+  AVG(rental_rate / rental_duration)     AS mean,
+  MEDIAN(rental_rate / rental_duration)  AS median,
+  MAX(rental_rate / rental_duration)     AS max
+FROM film;
 ```
+
+- Compute percentiles to group films into four simple bands (Low, Medium, High, Very High)
+
+```sql film_price
+WITH base AS (
+    SELECT 
+        ROUND(rental_rate / rental_duration, 4) AS daily_price
+    FROM film
+),
+quantiles AS (
+    SELECT
+        PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY daily_price) AS p50,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY daily_price) AS p75,
+        PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY daily_price) AS p90
+    FROM base
+),
+binned AS (
+    SELECT
+        b.daily_price,
+        CASE 
+            WHEN b.daily_price <= q.p50 THEN 'Low price'
+            WHEN b.daily_price <= q.p75 THEN 'Medium price'
+            WHEN b.daily_price <= q.p90 THEN 'High price'
+            ELSE 'Very High price'
+        END AS price_band
+    FROM base b
+    CROSS JOIN quantiles q
+)
+SELECT
+    price_band,
+    COUNT(*) AS count
+FROM binned
+GROUP BY price_band
+ORDER BY count DESC;
+```
+
+## Task 1 E: Which actors have played in most movies?
