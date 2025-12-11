@@ -3,11 +3,4 @@
 name: sakila # adjusted to sakila database
 type: duckdb
 options:
-  filename: sakila.duckdb
-
-
-  # adjusted to data/sakila database since file lives there
-  # Without this adjustment, dashboards will operate on an empty environment
-  # documentation in the README.md file number 8 explains this change
-
-# ./sources/sakila/sakila.duckdb
+  filename: sakila.duckdb # adjusted to sakila database
