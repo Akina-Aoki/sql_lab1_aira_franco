@@ -2,24 +2,27 @@
 title: Sakila Database Analysis
 ---
 
-<Details title = 'Exploratory Data Analysis of the Sakila Database'>
-This dashboard presents an exploratory data analysis of the Sakila database, which is a sample database provided by MySQL that represents a DVD rental store. 
+<Details title = 'Details of the project'>
+This dashboard presents an exploratory data analysis of the Sakila database, which is a sample database provided by MySQL that represents a DVD rental store. It includes tables for films, actors, customers, rentals, and payments, among others. The analysis focuses on the film table to extract insights about movie lengths, titles, rental prices, top actor movie counts, genre distributions, and revenue trends. Various SQL queries are executed to retrieve relevant data, which is then visualized using bar charts and data tables to facilitate understanding of the dataset's characteristics and trends.
 </Details>
 
 ## Task 1 A: Which movies are longer than 180 minutes?
 
 ```sql film_180
-SELECT 
-    title,
-    length
-FROM
-    film
-WHERE
-    length > 180
-ORDER BY
-    length DESC;
+SELECT
+  title,
+  length
+FROM film
+WHERE length > 180
+ORDER BY length DESC, title ASC;
 ```
 
+<DataTable
+  data={film_180}
+  title="Movies Longer than 180 Minutes"
+  rowsPerPage={10}
+  search={true}
+/>
 
 ## Task 1 B: Which movies have the word "love" in the title?
 
@@ -34,19 +37,12 @@ FROM
 WHERE
     title ILIKE 'love %'
     OR title ILIKE '% love'
+ORDER BY title ASC;
 ```
    
-<BarChart
-    data = {film_love}
-    x = "title"
-    y = "length"
-    color = "success"
-    title = "Distribution of movies with 'Love' in the Title"
-    swapXY = true 
-/>
 
-
-## Task 1 C: Calculate descriptive statistics. The shortest, average, median and longest movie length on the length column.
+## Task 1 C: Calculate descriptive statistics. 
+The shortest, average, median and longest movie length on the length column.
 
 ```sql film_stats
 SELECT
@@ -56,6 +52,43 @@ SELECT
     MAX(length) AS longest
 FROM film;
 ```
+
+### EXTRA EDA 1: Which runtime category monetizes best?
+
+```sql runtime_revenue
+WITH film_band AS (
+    SELECT f.film_id, f.title, f.length,
+        CASE
+            WHEN f.length < 90 THEN 'Short'
+            WHEN f.length BETWEEN 90 AND 150 THEN 'Medium'
+            ELSE 'Long'
+        END AS length_band
+    FROM sakila.film f),
+
+revenue AS (
+    SELECT
+        fb.length_band,
+        COUNT(DISTINCT fb.film_id) AS film_count,
+        SUM(p.amount) AS length_band_revenue
+    FROM film_band fb
+    JOIN sakila.inventory i ON fb.film_id = i.film_id
+    JOIN sakila.rental r    ON i.inventory_id = r.inventory_id
+    JOIN sakila.payment p   ON r.rental_id = p.rental_id
+    GROUP BY fb.length_band)
+
+SELECT length_band, film_count, length_band_revenue
+FROM revenue
+ORDER BY length_band DESC;
+```
+
+<BarChart
+    data = {runtime_revenue}
+    x = "length_band"
+    y = "length_band_revenue"
+    title = "Total Revenue by Film Length Band"
+    xLabel = "Film Length Band"
+    yLabel = "Total Revenue"
+/>
 
 ## Task 1 D:  The top 10 most expensive movies to rent per day.
 
