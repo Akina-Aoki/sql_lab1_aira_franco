@@ -1,1 +1,0 @@
-SELECT * FROM staging.customer_list;
