@@ -51,7 +51,7 @@ SELECT
 FROM film;
 ```
 
-## EXTRA EDA 1: Which runtime category monetizes best?
+## EXTRA EDA 1: Revenue per runtime cateogry
 
 ```sql runtime_revenue
 WITH film_band AS (
@@ -119,7 +119,7 @@ ORDER BY rank_num, title;
     title="Top 10 Most Expensive Films"
 />
 
-## EXTRA EDA 2: Price band distribution analysis
+## EXTRA EDA 2: Daily_price band distribution analysis
 ### A. Analyze the price band distribution and aggregate film count per price band.
 
 ```price_band_stats
@@ -294,7 +294,7 @@ JOIN sakila.customer c
     ON p.customer_id = c.customer_id
 GROUP BY customer
 ORDER BY total_spend DESC
-LIMIT 6;
+LIMIT 5;
 ```
 
 <BarChart
@@ -338,7 +338,7 @@ ORDER BY revenue DESC;
   yTickValues={[3000, 3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400]}
 />
 
-# Task 2C: Most number of films per category.
+## EXTRA EDA 5: Inventory number of films per category.
 ```sql films_per_genre
 SELECT
     c.name AS genre,
