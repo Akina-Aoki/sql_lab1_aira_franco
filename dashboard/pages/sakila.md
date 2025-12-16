@@ -1,96 +1,163 @@
 ---
-title: Sakila Database Analysis
+title: 1. Top revenue-generating film categories.
 ---
 
 <Details title = 'Details of the project'>
-This dashboard presents an exploratory data analysis of the Sakila database, which is a sample database provided by MySQL that represents a DVD rental store. It includes tables for films, actors, customers, rentals, and payments, among others. The analysis focuses on the film table to extract insights about movie lengths, titles, rental prices, top actor movie counts, genre distributions, and revenue trends. Various SQL queries are executed to retrieve relevant data, which is then visualized using bar charts and data tables to facilitate understanding of the dataset's characteristics and trends.
+This analysis supports management decisions for a DVD rental business preparing for seasonal incentives and future expansion.
+
+The goal is to understand what drives revenue, how pricing and content length affect performance, and where inventory and demand are misaligned.
 </Details>
 
-# Task 1 A: Which movies are longer than 180 minutes?
 
-```sql film_180
+# Top revenue-generating film categories.
+Which film categories bring in the most money?
+
+```sql top_genre_revenue
 SELECT
-  title,
-  length
-FROM film
-WHERE length > 180
-ORDER BY length DESC, title ASC;
-```
-<DataTable
-  data={film_180}
-  title="Movies Longer than 180 Minutes"
-  rowsPerPage={8}
-  search={true}
-/>
-
-# Task 1 B: Which movies have the word "love" in the title?
-
-```sql film_love
-SELECT
-    title,
-    rating,
-    length,
-    description
-FROM 
-    film
-WHERE
-    title ILIKE 'love %'
-    OR title ILIKE '% love'
-ORDER BY title ASC;
-```
-   
-# Task 1 C: Calculate descriptive statistics. 
-The shortest, average, median and longest movie length on the length column.
-
-```sql film_stats
-SELECT
-    MIN(length) AS shortest,
-    AVG(length) AS average,
-    MEDIAN(length) AS median,
-    MAX(length) AS longest
-FROM film;
-```
-
-## EXTRA EDA 1: Revenue per runtime cateogry
-
-```sql runtime_revenue
-WITH film_band AS (
-    SELECT f.film_id, f.title, f.length,
-        CASE
-            WHEN f.length < 90 THEN 'Short'
-            WHEN f.length BETWEEN 90 AND 150 THEN 'Medium'
-            ELSE 'Long'
-        END AS length_band
-    FROM sakila.film f),
-
-revenue AS (
-    SELECT
-        fb.length_band,
-        COUNT(DISTINCT fb.film_id) AS film_count,
-        SUM(p.amount) AS length_band_revenue
-    FROM film_band fb
-    JOIN sakila.inventory i ON fb.film_id = i.film_id
-    JOIN sakila.rental r    ON i.inventory_id = r.inventory_id
-    JOIN sakila.payment p   ON r.rental_id = p.rental_id
-    GROUP BY fb.length_band)
-
-SELECT length_band, film_count, length_band_revenue
-FROM revenue
-ORDER BY length_band DESC;
+    c.name AS genre,
+    ROUND(SUM(p.amount), 2) AS revenue
+FROM payment p
+JOIN rental r ON p.rental_id = r.rental_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN film_category fc ON fc.film_id = f.film_id
+JOIN category c ON c.category_id = fc.category_id
+GROUP BY c.name
+ORDER BY revenue DESC;
 ```
 
 <BarChart
-  data={runtime_revenue}
-  x="length_band"
-  y="length_band_revenue"
-  series="length_band"
-  title="Total Revenue by Film Length Band"
-  sort={{ x: ["Short", "Medium", "Long"] }}
-  yTickCount={5}
+  data={top_genre_revenue}
+  x="genre"
+  y="revenue"
+  series="genre"
+  title="Total Revenue by Genre"
+  sort={{ x: { by: "y", order: "desc" } }}
+  yMin={3000}
+  yMax={5400}
+  yTickValues={[3000, 3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400]}
 />
 
+## Inventory number of films per category.
+Where is the company currently investing its inventory?
 
-# Task 1 D: The top 10 most expensive movies to rent per day.
+```sql films_per_genre
+SELECT
+    c.name AS genre,
+    COUNT(*) AS film_count
+FROM sakila.film f
+JOIN sakila.film_category fc
+    ON f.film_id = fc.film_id
+JOIN sakila.category c
+    ON fc.category_id = c.category_id
+GROUP BY c.name
+ORDER BY film_count DESC, genre;
+```
+
+<BarChart
+  data={films_per_genre}
+  x="genre"
+  y="film_count"
+  series="genre"
+  title="Number of Films per Genre"
+  sort={{ x: { by: "y", order: "desc" } }}
+  yMin={50}
+  yMax={75}
+  yTickValues={[50, 55, 60, 65, 70, 75]}
+/>
+
+**Improvements from the business insight**
+- Increase acquisition and availability in high-revenue, under-represented categories
+- Slow or cap expansion in low-revenue, over-represented categories
+- Use revenue-per-film (not film count) as a guiding KPI for future expansion
+
+
+# Top 10 revenue-generating films and their genres.
+Which individual films actually drive revenue, and how can we use that to grow sales?
+
+```sql top10_revenue_films
+SELECT 
+  f.film_id,
+  f.title,
+  c.name AS genre,
+  ROUND(SUM(p.amount), 2) AS revenue
+FROM payment p
+JOIN rental r ON p.rental_id = r.rental_id
+JOIN inventory i ON r.inventory_id = i.inventory_id
+JOIN film f ON i.film_id = f.film_id
+JOIN film_category fc ON fc.film_id = f.film_id
+JOIN category c ON c.category_id = fc.category_id
+GROUP BY f.film_id, f.title, c.name
+ORDER BY revenue DESC, f.title ASC
+LIMIT 10;
+```
+
+<BarChart
+  data={top10_revenue_films}
+  x="title"
+  y="revenue"
+  series="genre"
+  title="Top 10 Films by Total Revenue (by Genre)"
+  sort={{ x: { by: "y", order: "desc" } }}
+  yMin={180}
+  yTickValues={[180, 200, 220, 240]}
+/>
+**Business insight**
+- Increase the number of copies for top revenue films
+- Use them in promotions and seasonal campaigns
+- Feature them more prominently to drive rentals
+- Use these films as anchors when expanding similar titles or genres
+
+
+# Top-earning ranking segments
+How many films exist in each rating category.
+
+```sql films_per_rating
+SELECT
+    rating,
+    COUNT(*) AS number_of_films
+FROM film
+GROUP BY rating
+ORDER BY number_of_films DESC;
+```
+
+<DataTable
+  data={films_per_rating}
+  title="Number of Films by Rating"
+  rowsPerPage={10}
+/>
+
+# How much revenue per rating class is generated.
+```sql revenue_per_rating
+SELECT
+    f.rating,
+    SUM(p.amount) AS revenue
+FROM film f
+LEFT JOIN inventory i ON f.film_id = i.film_id
+LEFT JOIN rental r ON i.inventory_id = r.inventory_id
+LEFT JOIN payment p ON r.rental_id = p.rental_id
+GROUP BY f.rating
+ORDER BY revenue DESC;
+```
+
+<BarChart
+  data={revenue_per_rating}
+  x="rating"
+  y="revenue"
+  series="rating"
+  colorPalette="default"
+  title="Total Revenue by Film Rating"
+  sort={{ x: { by: "y", order: "desc" } }}
+/>
+**Business insight**
+- Focus marketing and promotions on ratings that generate the most revenue
+- Adjust inventory to stock more films in high-revenue rating categories
+
+# Top 10 most expensive movies to rent per day.
+How is our rental pricing structured, and where do we have room to improve revenue without breaking customer demand?
+Look at: 
+1. The most expensive films per day (premium titles)
+2. The overall price distribution (how the full catalog is priced)
 
 ```sql top10_expensive_films
 WITH x AS (
@@ -119,8 +186,8 @@ ORDER BY rank_num, title;
     title="Top 10 Most Expensive Films"
 />
 
-## EXTRA EDA 2: Daily_price band distribution analysis
-### A. Analyze the price band distribution and aggregate film count per price band.
+# Daily_price band distribution analysis:
+## Analyze the price band distribution and aggregate film count per price band.
 
 ```price_band_stats
 SELECT
@@ -132,7 +199,7 @@ SELECT
 FROM film;
 ```
 
-### B. Compute percentiles to show price distribution in bins (low, medium, high, very high)
+## Compute percentiles to show price distribution in bins (low, medium, high, very high)
 
 * The daily price ranges for each price band are pre-calculated as follows:
 ```sql daily_price_range
@@ -187,179 +254,56 @@ ORDER BY COUNT(*) DESC;
 />
 
 
+# Statistics on movie lengths in the inventory
+Check the stats of the shortest, average, median and longest movies in the inventory.
 
-# Task 1 E: Top 10 actors with the most movies.
-```sql top10_actors
-WITH actor_counts AS (
+```sql film_stats
+SELECT
+    MIN(length) AS shortest,
+    AVG(length) AS average,
+    MEDIAN(length) AS median,
+    MAX(length) AS longest
+FROM film;
+```
+
+# How does film runtime relate to overall revenue?
+
+```sql runtime_revenue
+WITH film_band AS (
+    SELECT f.film_id, f.title, f.length,
+        CASE
+            WHEN f.length < 90 THEN 'Short'
+            WHEN f.length BETWEEN 90 AND 150 THEN 'Medium'
+            ELSE 'Long'
+        END AS length_band
+    FROM sakila.film f),
+
+revenue AS (
     SELECT
-        a.actor_id,
-        a.first_name,
-        a.last_name,
-        COUNT(*) AS movie_count
-    FROM sakila.actor a
-    JOIN sakila.film_actor fa
-        ON a.actor_id = fa.actor_id
-    GROUP BY a.actor_id, a.first_name, a.last_name
-),
-ranked AS (
-    SELECT
-        first_name,
-        last_name,
-        movie_count,
-        DENSE_RANK() OVER (ORDER BY movie_count DESC) AS rank
-    FROM actor_counts)
-SELECT rank, first_name, last_name, movie_count
-FROM ranked
-WHERE rank <= 10
-ORDER BY rank ASC, first_name ASC, last_name ASC;
-```
+        fb.length_band,
+        COUNT(DISTINCT fb.film_id) AS film_count,
+        SUM(p.amount) AS length_band_revenue
+    FROM film_band fb
+    JOIN sakila.inventory i ON fb.film_id = i.film_id
+    JOIN sakila.rental r    ON i.inventory_id = r.inventory_id
+    JOIN sakila.payment p   ON r.rental_id = p.rental_id
+    GROUP BY fb.length_band)
 
-<DataTable
-  data={top10_actors}
-  title="Top 10 Actors by Number of Movies"
-  rowsPerPage={10}
-/>
-
-## EXTRA EDA 3: Top 10 revenue-generating films and their genres.
-```sql top10_revenue_films
-SELECT 
-  f.film_id,
-  f.title,
-  c.name AS genre,
-  ROUND(SUM(p.amount), 2) AS revenue
-FROM payment p
-JOIN rental r ON p.rental_id = r.rental_id
-JOIN inventory i ON r.inventory_id = i.inventory_id
-JOIN film f ON i.film_id = f.film_id
-JOIN film_category fc ON fc.film_id = f.film_id
-JOIN category c ON c.category_id = fc.category_id
-GROUP BY f.film_id, f.title, c.name
-ORDER BY revenue DESC, f.title ASC
-LIMIT 10;
+SELECT length_band, film_count, length_band_revenue
+FROM revenue
+ORDER BY length_band DESC;
 ```
 
 <BarChart
-  data={top10_revenue_films}
-  x="title"
-  y="revenue"
-  series="genre"
-  title="Top 10 Films by Total Revenue (by Genre)"
-  sort={{ x: { by: "y", order: "desc" } }}
-  yMin={180}
-  yTickValues={[180, 200, 220, 240]}
+  data={runtime_revenue}
+  x="length_band"
+  y="length_band_revenue"
+  series="length_band"
+  title="Total Revenue by Film Length Band"
+  sort={{ x: ["Short", "Medium", "Long"] }}
+  yTickCount={5}
 />
 
-## EXTRA EDA 4: Top-earning ranking segments
-### A. How many films exist in each rating category.
-
-```sql films_per_rating
-SELECT
-    rating,
-    COUNT(*) AS number_of_films
-FROM film
-GROUP BY rating
-ORDER BY number_of_films DESC;
-```
-
-### B.How much revenue per rating class is generated.
-```sql revenue_per_rating
-SELECT
-    f.rating,
-    SUM(p.amount) AS revenue
-FROM film f
-LEFT JOIN inventory i ON f.film_id = i.film_id
-LEFT JOIN rental r ON i.inventory_id = r.inventory_id
-LEFT JOIN payment p ON r.rental_id = p.rental_id
-GROUP BY f.rating
-ORDER BY revenue DESC;
-```
-
-<BarChart
-  data={revenue_per_rating}
-  x="rating"
-  y="revenue"
-  series="rating"
-  colorPalette="default"
-  title="Total Revenue by Film Rating"
-  sort={{ x: { by: "y", order: "desc" } }}
-/>
-
-# Task 2A: Top 5 customers by total spending.
-```sql top5_customers
-SELECT
-    CONCAT(c.first_name, ' ', c.last_name) AS customer,
-    ROUND(SUM(p.amount), 2) AS total_spend
-FROM sakila.payment p
-JOIN sakila.customer c
-    ON p.customer_id = c.customer_id
-GROUP BY customer
-ORDER BY total_spend DESC
-LIMIT 5;
-```
-
-<BarChart
-  data={top5_customers}
-  x="customer"
-  y="total_spend"
-  title="Top 6 Customers by Total Spend"
-  sort={{ x: { by: "y", order: "desc" } }}
-  series="customer"
-  colorPalette="default"
-  yMin={180}
-  yMax={225}
-  yTickValues={[180, 195, 205, 215, 225]}
-/>
-
-
-# Task 2B : Top revenue-generating film categories.
-```sql top_genre_revenue
-SELECT
-    c.name AS genre,
-    ROUND(SUM(p.amount), 2) AS revenue
-FROM payment p
-JOIN rental r ON p.rental_id = r.rental_id
-JOIN inventory i ON r.inventory_id = i.inventory_id
-JOIN film f ON i.film_id = f.film_id
-JOIN film_category fc ON fc.film_id = f.film_id
-JOIN category c ON c.category_id = fc.category_id
-GROUP BY c.name
-ORDER BY revenue DESC;
-```
-
-<BarChart
-  data={top_genre_revenue}
-  x="genre"
-  y="revenue"
-  series="genre"
-  title="Total Revenue by Genre"
-  sort={{ x: { by: "y", order: "desc" } }}
-  yMin={3000}
-  yMax={5400}
-  yTickValues={[3000, 3300, 3600, 3900, 4200, 4500, 4800, 5100, 5400]}
-/>
-
-## EXTRA EDA 5: Inventory number of films per category.
-```sql films_per_genre
-SELECT
-    c.name AS genre,
-    COUNT(*) AS film_count
-FROM sakila.film f
-JOIN sakila.film_category fc
-    ON f.film_id = fc.film_id
-JOIN sakila.category c
-    ON fc.category_id = c.category_id
-GROUP BY c.name
-ORDER BY film_count DESC, genre;
-```
-
-<BarChart
-  data={films_per_genre}
-  x="genre"
-  y="film_count"
-  series="genre"
-  title="Number of Films per Genre"
-  sort={{ x: { by: "y", order: "desc" } }}
-  yMin={50}
-  yMax={75}
-  yTickValues={[50, 55, 60, 65, 70, 75]}
-/>
+**Business insight**
+Revenue is not evenly distributed across runtime categories.
+Revenue is highest for medium-length films compared to short and long films.

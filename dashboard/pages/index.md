@@ -1,56 +1,19 @@
 ---
-title: Welcome to Evidence
+title: AIRA the Data Engineer – Analytics Dashboard
 ---
 
-<Details title='How to edit this page'>
+Need businesness insights from your messy data? You've come to the right place! I'm AIRA, your data engineer here to answer questions using SQL and data visualization.
 
-  This page can be found in your project at `/pages/index.md`. Make a change to the markdown file and save it to see the change take effect in your browser.
-</Details>
+![AIRA the Data Engineer](/static/fig1.png)
 
-```sql categories
-  select
-      category
-  from needful_things.orders
-  group by category
-```
+### Contents
 
-<Dropdown data={categories} name=category value=category>
-    <DropdownOption value="%" valueLabel="All Categories"/>
-</Dropdown>
+This analysis supports management decisions for a DVD rental business preparing for seasonal incentives and future expansion.
 
-<Dropdown name=year>
-    <DropdownOption value=% valueLabel="All Years"/>
-    <DropdownOption value=2019/>
-    <DropdownOption value=2020/>
-    <DropdownOption value=2021/>
-</Dropdown>
+The goal is to understand what drives revenue, how pricing and content length affect performance, and where inventory and demand are misaligned.
 
-```sql orders_by_category
-  select 
-      date_trunc('month', order_datetime) as month,
-      sum(sales) as sales_usd,
-      category
-  from needful_things.orders
-  where category like '${inputs.category.value}'
-  and date_part('year', order_datetime) like '${inputs.year.value}'
-  group by all
-  order by sales_usd desc
-```
 
-<BarChart
-    data={orders_by_category}
-    title="Sales by Month, {inputs.category.label}"
-    x=month
-    y=sales_usd
-    series=category
-/>
+### Projects
+- **Sakila Database Analysis** – end-to-end exploratory analysis of a DVD rental business dataset
 
-## What's Next?
-- [Connect your data sources](settings)
-- Edit/add markdown files in the `pages` folder
-- Deploy your project with [Evidence Cloud](https://evidence.dev/cloud)
-
-## Get Support
-- Message us on [Slack](https://slack.evidence.dev/)
-- Read the [Docs](https://docs.evidence.dev/)
-- Open an issue on [Github](https://github.com/evidence-dev/evidence)
+More datasets and insights will be added as the project evolves.
