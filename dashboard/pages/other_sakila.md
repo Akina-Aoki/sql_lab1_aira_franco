@@ -1,5 +1,5 @@
 ---
-title: II. Other Sakila Database Analysis
+title: Other Sakila Database Analysis
 ---
 
 <Details title = 'Details of the project'>
