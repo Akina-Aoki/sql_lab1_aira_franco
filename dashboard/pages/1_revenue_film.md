@@ -1,10 +1,6 @@
 ---
-title: 1. Revenue and Film Relationship
+title: 1. Revenue and Film Inventory Relationship
 ---
-
-This analysis supports management decisions for a DVD rental business preparing for seasonal incentives and future expansion.
-
-The goal is to understand what drives revenue, how pricing and content length affect performance, and where inventory and demand are misaligned.
 
 # Top revenue-generating film categories.
 Which film categories bring in the most money?
@@ -63,9 +59,12 @@ ORDER BY film_count DESC, genre;
   yTickValues={[50, 55, 60, 65, 70, 75]}
 />
 
-**Improvements from the business insight**
-- Increase acquisition and availability in high-revenue, under-represented categories
-- Slow or cap expansion in low-revenue, over-represented categories
-- Use revenue-per-film (not film count) as a guiding KPI for future expansion
+**Business insight**
+- Demand higher than supply
+- Strong genres perform better
+- Current catalog not balanced
+- Add more movies in top genres
+- Increase revenue without more inventory
+- Avoid low profit genres
 
 

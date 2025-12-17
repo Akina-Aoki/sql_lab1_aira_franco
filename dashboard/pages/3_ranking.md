@@ -1,7 +1,7 @@
 ---
 title: 3. Revenue and Ranking Segments Relationship
 ---
-
+Is it profitable to promote films by ratings?
 # Top-earning ranking segments
 How many films exist in each rating category.
 

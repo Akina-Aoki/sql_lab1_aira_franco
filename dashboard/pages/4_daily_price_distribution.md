@@ -2,11 +2,10 @@
 title: 4. Top 10 most expensive films and the price distributions
 ---
 
-# Top 10 most expensive movies to rent per day.
-How is our rental pricing structured, and where do we have room to improve revenue without breaking customer demand?
-Look at: 
+How is our rental pricing structured? 
+Where do we have room to improve revenue without breaking customer affordability?
+
 1. The most expensive films per day (premium titles)
-2. The overall price distribution (how the full catalog is priced)
 
 ```sql top10_expensive_films
 WITH x AS (
@@ -37,6 +36,7 @@ ORDER BY rank_num, title;
 
 # Daily_price band distribution analysis:
 ## Analyze the price band distribution and aggregate film count per price band.
+2. The overall price distribution (how the full catalog is priced)
 
 ```price_band_stats
 SELECT

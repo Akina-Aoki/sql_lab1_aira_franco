@@ -8,27 +8,31 @@ This project shows the full process of working with data: loading it, analyzing 
 ```
 SQL_LAB1_AIRA_FRANCO/
 ├── assets/
-│   └── sakila_erd.png            ← Sakila database ERD image
+│   └── sakila_erd.png              ← Sakila database ERD image
 ├── dashboard/
-│   ├── pages/
-│   │   ├── index.md               ← Dashboard home page
-│   │   └── sakila.md              ← Sakila database page
+│   ├── pages/                      ← Analysis pages
+│   │   ├── index.md                ← Dashboard home page
+│   │   ├── 1_revenue_film.md
+│   │   ├── 2_revenue_genre.md
+│   │   ├── 3_ranking.md
+│   │   ├── 4_daily_price_distribution.md
+│   │   ├── 5_runtime_revenue.md
+│   │   └── other_sakila.md
 │   └── sources/
-│       ├── needful_things/        ← Evidence internal files (auto-generated)
-│       └── sakila/                ← Database connection & query setup for Evidence
+│       ├── needful_things/         ← DO NOT TOUCH (auto-generated)
+│       └── sakila/                 ← Database connection & query setup for Evidence
 ├── data/
-│   ├── sakila.duckdb              ← Main database used for analysis
-│   └── sqlite-sakila.db           ← Original source database
-├── documentation
-│   └── README.md                  ← How to set up and run the Sakila Project
+│   ├── sakila.duckdb               ← Main database used for analysis
+│   └── sqlite-sakila.db            ← Original source database
+├── documentation/
+│   └── README.md                   ← How to set up and run the Sakila Project
 ├── sql/
-│   └── load_sakila.sql            ← SQL used to load and prepare sakila data
-├── load_sakila_sqlite_duckdb.py   ← Script to move sakila data from SQLite to DuckDB
-├── duckdb_pandas.ipynb            ← Sakila data exploration with Pandas
-├── test_sakila.ipynb              ← Basic data checks and tests
-├── pyproject.toml                 ← Project dependencies and settings
-└── README.md                      ← This file: Project overview and insights video
-
+│   └── load_sakila.sql             ← SQL used to load and prepare Sakila data
+├── load_sakila_sqlite_duckdb.py    ← Script to move Sakila data from SQLite to DuckDB
+├── duckdb_pandas.ipynb             ← Sakila data exploration with Pandas
+├── test_sakila.ipynb               ← Basic data checks and tests
+├── pyproject.toml                  ← Project dependencies and settings
+└── README.md                       ← Project overview and insights video
 ```
 ![Sakila Database](assets/sakila_erd.png)
 
@@ -36,7 +40,8 @@ SQL_LAB1_AIRA_FRANCO/
 ## Video explanation of insights
 **DuckDB · Pandas · Evidence Dashboard**
 
-[![Watch the video](https://img.youtube.com/vi/Bd35z9qoPdk/maxresdefault.jpg)](https://www.youtube.com/watch?v=Bd35z9qoPdk)
+[![Watch the video](https://img.youtube.com/vi/1XSb0SXZ-V4/maxresdefault.jpg)](https://www.youtube.com/watch?v=1XSb0SXZ-V4)
+
 
 ## Learning Outcomes
 - Use SQL for joins, filters, calculations, CTEs, and window functions
